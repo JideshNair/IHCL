@@ -33,7 +33,38 @@
 
 <script type="text/javascript" async="" src="https://cdn.yellowmessenger.com/plugin/latest/dist/main.min.js"></script><script type="text/javascript" async="" src="https://app.yellowmessenger.com/widget/main.js"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/plugins/ua/linkid.js"></script><script async="" src="https://www.clarity.ms/s/0.7.18/clarity.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-S8WJ80ZDYT&amp;l=dataLayer&amp;cx=c"></script><script src="https://connect.facebook.net/signals/config/1621815138100251?v=2.9.138&amp;r=stable&amp;domain=www.tajhotels.com" async=""></script><script async="" src="https://connect.facebook.net/en_US/fbevents.js"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/gtm/js?id=GTM-5V9D58K&amp;cid=1248924054.1700145450"></script><script async="" src="https://www.clarity.ms/tag/fx0wku0l5l"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-W8MR36"></script><script async="" src="https://www.google-analytics.com/analytics.js"></script><script src="https://accounts.tatadigital.com/v2/tdl-sso-auth.js" async="" defer=""></script>
 <!-- End tata digital platform library --> 
+                               <script type="text/javascript">
+     var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+ // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
+clevertap.account.push({"id": "RZ7-K44-ZW7Z"});
+clevertap.privacy.push({optOut: false}); //set the flag to true, if the user of the device opts out of sharing their data
+clevertap.privacy.push({useIP: true}); //set the flag to true, if the user agrees to share their IP data
+ (function () {
+         var wzrk = document.createElement('script');
+         wzrk.type = 'text/javascript';
+         wzrk.async = true;
+         wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
+         var s = document.getElementsByTagName('script')[0];
+         s.parentNode.insertBefore(wzrk, s);
+  })();
 
+
+  clevertap.notifications.push({
+    "titleText":"Would you like to receive Push Notifications?",
+    "bodyText":"We promise to only send you relevant content and give you updates on your transactions",
+    "okButtonText":"Sign me up!",
+    "rejectButtonText":"No thanks",
+    "okButtonColor":"#F28046",
+    "askAgainTimeInSeconds":5,
+    "serviceWorkerPath": "./clevertap_sw.js" // path to your custom service worker file
+  });
+</script>                                    
+<script type="text/javascript">
+  clevertap.event.push("Page Viewed", {
+  "URL":window.location.href
+
+});
+</script>
     
 <!--opel sdk link-->
 
