@@ -26,9 +26,9 @@
 	                           <script type="text/javascript">
      var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
  // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
-clevertap.account.push({"id": "8RZ-R99-446Z"});
+clevertap.account.push({"id": "RZ7-K44-ZW7Z"});
 clevertap.privacy.push({optOut: false}); //set the flag to true, if the user of the device opts out of sharing their data
-clevertap.privacy.push({useIP: false}); //set the flag to true, if the user agrees to share their IP data
+clevertap.privacy.push({useIP: true}); //set the flag to true, if the user agrees to share their IP data
  (function () {
          var wzrk = document.createElement('script');
          wzrk.type = 'text/javascript';
@@ -49,9 +49,10 @@ clevertap.privacy.push({useIP: false}); //set the flag to true, if the user agre
     "serviceWorkerPath": "./clevertap_sw.js" // path to your custom service worker file
   });
 </script>                                    
-   <script type="text/javascript">
+<script type="text/javascript">
   clevertap.event.push("Home page");
 </script>
+   
     <!-- Tata digital platform library -->
 <!--<script src="https://accounts.tatadigital.com/tdl-sso.js" async defer></script>-->
 
@@ -38825,8 +38826,8 @@ function closeBusinessConnectForm() {
                                 
                                 
                                 <div class="nav-item">
-                                
-                                <div class="nav-link text-caps log-spacing cm-header-dropdowns" tabindex="0" role="button">
+                                <img class=""style="height: 20px;" id="CTwebinbox" src="./etc.clientlibs/img/bell.png" alt="Website Language Flag">
+                                <div class="nav-link text-caps log-spacing cm-header-dropdowns" tabindex="0" role="">
                                     <img class="inline-block selected-flag" src="https://www.tajhotels.com/content/dam/tajhotels/icons/style-icons/flag-uk.jpg" alt="Website Language Flag">
                                     <span class="inline-block selected-txt">EN</span>
                                     <span class="inline-block header-dropdown-image last-image icon-drop-down-arrow"></span>
