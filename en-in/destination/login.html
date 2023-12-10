@@ -11,6 +11,40 @@
 <script type="text/javascript" id="">!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,a.loaded=!0,a.version="2.0",a.queue=[],c=e.createElement(f),c.async=!0,c.src=g,d=e.getElementsByTagName(f)[0],d.parentNode.insertBefore(c,d))}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","1621815138100251",{em:"insert_email_variable,"});fbq("track","PageView");</script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1621815138100251&amp;ev=PageView&amp;noscript=1"></noscript>
 <script type="text/javascript">
+
+
+     var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+ // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
+clevertap.account.push({"id": "RZ7-K44-ZW7Z"});
+clevertap.privacy.push({optOut: false}); //set the flag to true, if the user of the device opts out of sharing their data
+clevertap.privacy.push({useIP: true}); //set the flag to true, if the user agrees to share their IP data
+ (function () {
+         var wzrk = document.createElement('script');
+         wzrk.type = 'text/javascript';
+         wzrk.async = true;
+         wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
+         var s = document.getElementsByTagName('script')[0];
+         s.parentNode.insertBefore(wzrk, s);
+  })();
+
+
+  clevertap.notifications.push({
+    "titleText":"Would you like to receive Push Notifications?",
+    "bodyText":"We promise to only send you relevant content and give you updates on your transactions",
+    "okButtonText":"Sign me up!",
+    "rejectButtonText":"No thanks",
+    "okButtonColor":"#F28046",
+    "askAgainTimeInSeconds":5,
+    "serviceWorkerPath": "./clevertap_sw.js" // path to your custom service worker file
+  });
+</script>                                    
+<script type="text/javascript">
+  clevertap.event.push("Page Viewed", {
+  "URL":window.location.href
+
+});
+</script>
+<script type="text/javascript">
     function Signin()
     {
         var phone = document.getElementById('phoneInputLogin-phone').value;
