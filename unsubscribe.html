@@ -3,18 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Popup</title>
+<title>Draggable Video Popup</title>
 <style>
-/* General CSS for desktop */
+/* General CSS */
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: transparent; /* Make the body background transparent */
-}
-
-#CT_InterstitialWrapper {
-    background-color: transparent !important; /* Force background to be transparent */
+    background-color: transparent;
 }
 
 #video-popup {
@@ -24,11 +20,16 @@ body {
     width: auto;
     height: 30%;
     aspect-ratio: 16 / 9;
-    background-color: transparent; /* Make the video popup background transparent */
+    background-color: transparent;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: none; /* Remove the shadow to ensure it's fully transparent */
+    box-shadow: none;
     z-index: 1000;
+    cursor: grab; /* Change cursor to indicate draggable area */
+}
+
+#video-popup.dragging {
+    cursor: grabbing; /* Change cursor when dragging */
 }
 
 #video-popup video {
@@ -66,50 +67,25 @@ body {
     opacity: 0.8;
 }
 
-/* Mobile-specific styles */
-@media screen and (max-width: 768px) {
-    #video-popup {
-        bottom: 40px;
-        right: 40px; 
-        width: auto;
-        height: auto;
-        aspect-ratio: 1 / 2;
-        max-width: 40vw; /* Ensure width does not exceed 30% of viewport width */
-        max-height: 40vh; /* Ensure height does not exceed 30% of viewport height */
-        border-radius: 8px;
-    }
-
-    #video-popup video {
-        object-fit: cover; /* Maintain content without black margins */
-    }
-
-    #close-image {
-        top: 5px;
-        right: 5px;
-        height: 20px; /* Larger size for mobile */
-        width: 20px;
-    }
-
-    .mute-btn {
-        top: 5px;
-        left: 5px;
-    }
-
-    .mute-btn img {
-        height: 20px; /* Larger size for mobile */
-        width: 20px;
-    }
+#video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1002;
+    display: block;
 }
 </style>
 </head>
 <body>
 
 <div id="video-popup">
-    <img id="close-image" src="https://cdn-icons-png.flaticon.com/512/665/665304.png" alt="Close" onclick="closePopup()">
-    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
+    <img id="close-image" src="https://cdn-icons-png.flaticon.com/512/665/665304.png" alt="Close" onclick="closePopup(event)">
+    <button id="mute-btn" class="mute-btn" onclick="toggleMute(event)">
         <img id="mute-icon" src="https://cdn-icons-png.flaticon.com/512/5949/5949045.png" alt="Mute">
     </button>
-    <div id="video-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1002; display: none;" onclick="redirectToLink()"></div>
+    <div id="video-overlay" onclick="redirectToLink(event)"></div>
     <video id="popup-video" autoplay loop muted playsinline disablePictureInPicture>
         <source src="https://videos.ctfassets.net/69qx72t49ip2/tgOKj5cHC4AH3mxloyAax/4d35baeecd59b9c79e3c5e42d3d78312/1_J-24_KCP_BZero1_Product_Animation03_1080x1920_1.mp4" type="video/mp4">
         Your browser does not support the video tag.
@@ -117,25 +93,33 @@ body {
 </div>
 
 <script>
-// User-Agent detection to differentiate between Android and iOS
+// User-Agent Detection
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isAndroid = /Android/i.test(navigator.userAgent);
 
+// Video and Button Elements
+const videoPopup = document.getElementById('video-popup');
 const video = document.getElementById('popup-video');
 const muteIcon = document.getElementById('mute-icon');
-const videoOverlay = document.getElementById('video-overlay');
 
-// Common Functions
-function closePopup() {
-    const overlay = window.parent.document.getElementById('intentOpacityDiv');
-    const wrapper = window.parent.document.getElementById('intentPreview');
-    setTimeout(() => {
-        if (overlay) overlay.remove();
-        if (wrapper) wrapper.remove();
-    }, 0); 
+// Variables for Draggable Functionality
+let isDragging = false;
+let startX, startY, initialLeft, initialTop;
+
+// Prevent Buttons from Triggering URL Redirect
+function stopPropagation(event) {
+    event.stopPropagation();
 }
 
-function toggleMute() {
+// Close Popup
+function closePopup(event) {
+    stopPropagation(event);
+    videoPopup.remove();
+}
+
+// Toggle Mute
+function toggleMute(event) {
+    stopPropagation(event);
     if (video.muted) {
         video.muted = false;
         muteIcon.src = "https://cdn-icons-png.flaticon.com/512/1705/1705050.png"; // Unmute icon
@@ -145,39 +129,53 @@ function toggleMute() {
     }
 }
 
-function redirectToLink() {
+// Redirect to URL
+function redirectToLink(event) {
     window.location.href = "https://luxury.tatacliq.com/search/?searchText=armani%20exchange:relevance:category:LSH1&searchCategory=LSH1";
 }
 
-// Platform-Specific Adjustments
-if (isIOS) {
-    // iOS-specific behavior
-    video.setAttribute('playsinline', '');
-    video.setAttribute('disablePictureInPicture', '');
+// Make the Video Popup Draggable
+videoPopup.addEventListener('mousedown', startDrag);
+videoPopup.addEventListener('touchstart', startDrag);
 
-    // Display overlay for handling clicks without triggering PiP
-    videoOverlay.style.display = 'block';
+function startDrag(event) {
+    isDragging = true;
+    const rect = videoPopup.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
 
-    // Attempt to programmatically play the video on load
-    document.addEventListener('DOMContentLoaded', () => {
-        video.play().catch((error) => {
-            console.log('iOS Autoplay failed:', error);
-        });
-    });
-} else if (isAndroid) {
-    // Android-specific behavior (default settings, no additional changes needed)
-    videoOverlay.style.display = 'none';
+    startX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+    startY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+
+    videoPopup.classList.add('dragging');
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
 }
 
-document.addEventListener('touchstart', handleCloseEvent);
-document.addEventListener('click', handleCloseEvent);
+function drag(event) {
+    if (!isDragging) return;
 
-function handleCloseEvent(event) {
-    const popup = document.getElementById('video-popup');
-    const closeImage = document.getElementById('close-image');
-    if (!popup.contains(event.target) || event.target === closeImage) {
-        closePopup();
-    }
+    const currentX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+    const currentY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
+
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    videoPopup.style.left = `${initialLeft + deltaX}px`;
+    videoPopup.style.top = `${initialTop + deltaY}px`;
+    videoPopup.style.position = 'absolute';
+}
+
+function endDrag() {
+    isDragging = false;
+    videoPopup.classList.remove('dragging');
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('touchmove', drag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchend', endDrag);
 }
 </script>
 
