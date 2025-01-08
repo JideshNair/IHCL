@@ -10,11 +10,11 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: transparent; /* Make the body background transparent */
+    background-color: transparent;
 }
 
 #CT_InterstitialWrapper {
-    background-color: transparent !important; /* Force background to be transparent */
+    background-color: transparent !important;
 }
 
 #video-popup {
@@ -24,10 +24,9 @@ body {
     width: auto;
     height: 30%;
     aspect-ratio: 16 / 9;
-    background-color: transparent; /* Make the video popup background transparent */
+    background-color: transparent;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: none; /* Remove the shadow to ensure it's fully transparent */
     z-index: 1000;
 }
 
@@ -44,7 +43,7 @@ body {
     height: 17px;
     width: 17px;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1002;
 }
 
 .mute-btn {
@@ -54,7 +53,7 @@ body {
     background-color: transparent;
     border: none;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1002;
 }
 
 .mute-btn img {
@@ -66,27 +65,29 @@ body {
     opacity: 0.8;
 }
 
+#video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+}
+
 /* Mobile-specific styles */
 @media screen and (max-width: 768px) {
     #video-popup {
         bottom: 40px;
         right: 40px; 
-        width: auto;
-        height: auto;
         aspect-ratio: 1 / 2;
-        max-width: 40vw; /* Ensure width does not exceed 40% of viewport width */
-        max-height: 40vh; /* Ensure height does not exceed 40% of viewport height */
-        border-radius: 8px;
-    }
-
-    #video-popup video {
-        object-fit: cover; /* Maintain content without black margins */
+        max-width: 40vw;
+        max-height: 40vh;
     }
 
     #close-image {
         top: 5px;
         right: 5px;
-        height: 20px; /* Larger size for mobile */
+        height: 20px;
         width: 20px;
     }
 
@@ -96,7 +97,7 @@ body {
     }
 
     .mute-btn img {
-        height: 20px; /* Larger size for mobile */
+        height: 20px;
         width: 20px;
     }
 }
@@ -105,11 +106,11 @@ body {
 <body>
 
 <div id="video-popup">
-    <img id="close-image" src="https://cdn-icons-png.flaticon.com/512/665/665304.png" alt="Close" onclick="closePopup(event)">
-    <button id="mute-btn" class="mute-btn" onclick="toggleMute(event)">
+    <img id="close-image" src="https://cdn-icons-png.flaticon.com/512/665/665304.png" alt="Close">
+    <button id="mute-btn" class="mute-btn">
         <img id="mute-icon" src="https://cdn-icons-png.flaticon.com/512/5949/5949045.png" alt="Mute">
     </button>
-    <div id="video-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1002; display: none;" onclick="redirectToLink(event)"></div>
+    <div id="video-overlay" onclick="redirectToLink()"></div>
     <video id="popup-video" autoplay loop muted playsinline disablePictureInPicture>
         <source src="https://videos.ctfassets.net/69qx72t49ip2/tgOKj5cHC4AH3mxloyAax/4d35baeecd59b9c79e3c5e42d3d78312/1_J-24_KCP_BZero1_Product_Animation03_1080x1920_1.mp4" type="video/mp4">
         Your browser does not support the video tag.
@@ -117,59 +118,43 @@ body {
 </div>
 
 <script>
-// User-Agent detection to differentiate between Android and iOS
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isAndroid = /Android/i.test(navigator.userAgent);
-
 const video = document.getElementById('popup-video');
 const muteIcon = document.getElementById('mute-icon');
 const videoOverlay = document.getElementById('video-overlay');
 
-// Common Functions
-function closePopup(event) {
-    event.stopPropagation(); // Prevent event bubbling
+// Close the popup
+document.getElementById('close-image').addEventListener('click', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
     const overlay = window.parent.document.getElementById('intentOpacityDiv');
     const wrapper = window.parent.document.getElementById('intentPreview');
-    setTimeout(() => {
-        if (overlay) overlay.remove();
-        if (wrapper) wrapper.remove();
-    }, 0); 
-}
+    if (overlay) overlay.remove();
+    if (wrapper) wrapper.remove();
+});
 
-function toggleMute(event) {
-    event.stopPropagation(); // Prevent event bubbling
-    if (video.muted) {
-        video.muted = false;
-        muteIcon.src = "https://cdn-icons-png.flaticon.com/512/1705/1705050.png"; // Unmute icon
-    } else {
-        video.muted = true;
-        muteIcon.src = "https://cdn-icons-png.flaticon.com/512/5949/5949045.png"; // Mute icon
-    }
-}
+// Toggle mute
+document.getElementById('mute-btn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    video.muted = !video.muted;
+    muteIcon.src = video.muted
+        ? "https://cdn-icons-png.flaticon.com/512/5949/5949045.png"
+        : "https://cdn-icons-png.flaticon.com/512/1705/1705050.png";
+});
 
-function redirectToLink(event) {
-    event.stopPropagation(); // Prevent bubbling from overlay to buttons
+// Redirect on overlay click
+function redirectToLink() {
     window.location.href = "https://luxury.tatacliq.com/search/?searchText=armani%20exchange:relevance:category:LSH1&searchCategory=LSH1";
 }
 
-// Platform-Specific Adjustments
-if (isIOS) {
-    video.setAttribute('playsinline', '');
-    video.setAttribute('disablePictureInPicture', '');
-    videoOverlay.style.display = 'block';
-
+// iOS-specific behavior
+if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
     document.addEventListener('DOMContentLoaded', () => {
         video.play().catch((error) => {
-            console.log('iOS Autoplay failed:', error);
+            console.log('iOS autoplay failed:', error);
         });
     });
-} else if (isAndroid) {
-    videoOverlay.style.display = 'none';
 }
-
-// Add event listeners to prevent redirection when buttons are clicked
-document.getElementById('close-image').addEventListener('click', (event) => event.stopPropagation());
-document.getElementById('mute-btn').addEventListener('click', (event) => event.stopPropagation());
 </script>
 
 </body>
