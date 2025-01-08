@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Draggable Video Popup</title>
+<title>Video Popup</title>
 <style>
 /* General CSS */
 body {
@@ -25,11 +25,6 @@ body {
     overflow: hidden;
     box-shadow: none;
     z-index: 1000;
-    cursor: grab; /* Change cursor to indicate draggable area */
-}
-
-#video-popup.dragging {
-    cursor: grabbing; /* Change cursor when dragging */
 }
 
 #video-popup video {
@@ -93,19 +88,6 @@ body {
 </div>
 
 <script>
-// User-Agent Detection
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isAndroid = /Android/i.test(navigator.userAgent);
-
-// Video and Button Elements
-const videoPopup = document.getElementById('video-popup');
-const video = document.getElementById('popup-video');
-const muteIcon = document.getElementById('mute-icon');
-
-// Variables for Draggable Functionality
-let isDragging = false;
-let startX, startY, initialLeft, initialTop;
-
 // Prevent Buttons from Triggering URL Redirect
 function stopPropagation(event) {
     event.stopPropagation();
@@ -114,12 +96,15 @@ function stopPropagation(event) {
 // Close Popup
 function closePopup(event) {
     stopPropagation(event);
+    const videoPopup = document.getElementById('video-popup');
     videoPopup.remove();
 }
 
 // Toggle Mute
 function toggleMute(event) {
     stopPropagation(event);
+    const video = document.getElementById('popup-video');
+    const muteIcon = document.getElementById('mute-icon');
     if (video.muted) {
         video.muted = false;
         muteIcon.src = "https://cdn-icons-png.flaticon.com/512/1705/1705050.png"; // Unmute icon
@@ -134,49 +119,9 @@ function redirectToLink(event) {
     window.location.href = "https://luxury.tatacliq.com/search/?searchText=armani%20exchange:relevance:category:LSH1&searchCategory=LSH1";
 }
 
-// Make the Video Popup Draggable
-videoPopup.addEventListener('mousedown', startDrag);
-videoPopup.addEventListener('touchstart', startDrag);
-
-function startDrag(event) {
-    isDragging = true;
-    const rect = videoPopup.getBoundingClientRect();
-    initialLeft = rect.left;
-    initialTop = rect.top;
-
-    startX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
-    startY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
-
-    videoPopup.classList.add('dragging');
-
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('touchmove', drag, { passive: false });
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-}
-
-function drag(event) {
-    if (!isDragging) return;
-
-    const currentX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
-    const currentY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
-
-    const deltaX = currentX - startX;
-    const deltaY = currentY - startY;
-
-    videoPopup.style.left = `${initialLeft + deltaX}px`;
-    videoPopup.style.top = `${initialTop + deltaY}px`;
-    videoPopup.style.position = 'absolute';
-}
-
-function endDrag() {
-    isDragging = false;
-    videoPopup.classList.remove('dragging');
-    document.removeEventListener('mousemove', drag);
-    document.removeEventListener('touchmove', drag);
-    document.removeEventListener('mouseup', endDrag);
-    document.removeEventListener('touchend', endDrag);
-}
+// Add Event Listeners to Prevent Overlay Clicks
+document.getElementById('close-image').addEventListener('click', stopPropagation);
+document.getElementById('mute-btn').addEventListener('click', stopPropagation);
 </script>
 
 </body>
