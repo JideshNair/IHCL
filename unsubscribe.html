@@ -1,109 +1,185 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<script type="text/javascript">
-     
-     var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], region:'us1'};
- // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
- clevertap.account.push({"id": "W6Z-8RW-485Z"});
- (function () {
-         var wzrk = document.createElement('script');
-         wzrk.type = 'text/javascript';
-         wzrk.async = true;
-         wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
-         var s = document.getElementsByTagName('script')[0];
-         s.parentNode.insertBefore(wzrk, s);
-  })();
-  
-  
-  clevertap.notificationCallback = function(msg){
-      //raise the notification viewed and clicked events in the callback
-      clevertap.raiseNotificationViewed();
-      var msg = msg;
-      console.log(JSON.stringify(msg));//your custom rendering implementation here
-      
-};
-  
-</script> 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Popup</title>
+<style>
+/* General CSS for desktop */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: transparent; /* Make the body background transparent */
+}
+
+#CT_InterstitialWrapper {
+    background-color: transparent !important; /* Force background to be transparent */
+}
+
+#video-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: auto;
+    height: 30%;
+    aspect-ratio: 16 / 9;
+    background-color: transparent; /* Make the video popup background transparent */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: none; /* Remove the shadow to ensure it's fully transparent */
+    z-index: 1000;
+}
+
+#video-popup video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#close-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 17px;
+    width: 17px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.mute-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.mute-btn img {
+    height: 20px;
+    width: 20px;
+}
+
+.mute-btn:hover {
+    opacity: 0.8;
+}
+
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #video-popup {
+        bottom: 40px;
+        right: 40px; 
+        width: auto;
+        height: auto;
+        aspect-ratio: 1 / 2;
+        max-width: 40vw; /* Ensure width does not exceed 30% of viewport width */
+        max-height: 40vh; /* Ensure height does not exceed 30% of viewport height */
+        border-radius: 8px;
+    }
+
+    #video-popup video {
+        object-fit: cover; /* Maintain content without black margins */
+    }
+
+    #close-image {
+        top: 5px;
+        right: 5px;
+        height: 20px; /* Larger size for mobile */
+        width: 20px;
+    }
+
+    .mute-btn {
+        top: 5px;
+        left: 5px;
+    }
+
+    .mute-btn img {
+        height: 20px; /* Larger size for mobile */
+        width: 20px;
+    }
+}
+</style>
 </head>
 <body>
- <div>    
-    <h4>I want to unsubscribe from future emails
-    </h4>        
-    <input type="text" id="email" /> 
-    <br/><br/>
-    <!-- Displaying unsubscribe groups in the below div once loaded -->
-    <div id="unsubscribe-groups" style="display: none"></div>
-    <!-- Unsubscribe groups buttont. User will click here and it should call `changeSubscriptionGroups`
-        method to send the request to CleverTap. -->
-    <button onclick="changeSubscriptionGroups()">Update Subscription Groups</button>    
- </div>  
- <script> 
-   window.onload = function() {
-        var isReEncode = false //Should be true only if your server is url encoding the URL on unsubscribe landing page     
-        var withGroups = true  // Should be true if the unsubscribe groups should be displayed on the landing page.
-        $WZRK_WR.getEmail(false, withGroups);
-    };
-    // will be called after the email id of the user has been fetched
-    function wzrk_email_fetched(emailStr, profile) {
-        document.getElementById("email").value = emailStr;
-        if(!profile || !profile.groups || profile.groups.length === 0) {
-            console.log("did not recv groups in callback");
-        }
-        var subscriptionGroups = profile.groups; // will be recvd only if withGroups passed true above
-        $WZRK_WR.setSubscriptionGroups(subscriptionGroups); // Can also be set here and can be retrieved by calling `$WZRK_WR.getSubscriptionGroups` method
-        $WZRK_WR.setUpdatedCategoryLong(profile);
-        displayGroups()
+
+<div id="video-popup">
+    <img id="close-image" src="https://cdn-icons-png.flaticon.com/512/665/665304.png" alt="Close" onclick="closePopup()">
+    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
+        <img id="mute-icon" src="https://cdn-icons-png.flaticon.com/512/5949/5949045.png" alt="Mute">
+    </button>
+    <div id="video-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1002; display: none;" onclick="redirectToLink()"></div>
+    <video id="popup-video" autoplay loop muted playsinline disablePictureInPicture>
+        <source src="https://videos.ctfassets.net/69qx72t49ip2/tgOKj5cHC4AH3mxloyAax/4d35baeecd59b9c79e3c5e42d3d78312/1_J-24_KCP_BZero1_Product_Animation03_1080x1920_1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<script>
+// User-Agent detection to differentiate between Android and iOS
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isAndroid = /Android/i.test(navigator.userAgent);
+
+const video = document.getElementById('popup-video');
+const muteIcon = document.getElementById('mute-icon');
+const videoOverlay = document.getElementById('video-overlay');
+
+// Common Functions
+function closePopup() {
+    const overlay = window.parent.document.getElementById('intentOpacityDiv');
+    const wrapper = window.parent.document.getElementById('intentPreview');
+    setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (wrapper) wrapper.remove();
+    }, 0); 
+}
+
+function toggleMute() {
+    if (video.muted) {
+        video.muted = false;
+        muteIcon.src = "https://cdn-icons-png.flaticon.com/512/1705/1705050.png"; // Unmute icon
+    } else {
+        video.muted = true;
+        muteIcon.src = "https://cdn-icons-png.flaticon.com/512/5949/5949045.png"; // Mute icon
     }
-  function displayGroups() {
-    //   Fetchin groups
-      var subscriptionGroups = $WZRK_WR.getSubscriptionGroups();
-    //  Rendering groups in above html div
-      var addList = document.getElementById('unsubscribe-groups');
-            addList.style.display = 'block';
-            for(var i = 0; i < subscriptionGroups.length; i++) {
-                var obj = subscriptionGroups[i];
-                var checkBox = document.createElement("INPUT");
-                var isUnsubscribed = obj.isUnsubscribed
-                checkBox.setAttribute("type", "checkbox");
-                if(isUnsubscribed){
-                    checkBox.setAttribute("checked", true);
-                }
-                checkBox.setAttribute("name", obj.name)
-                checkBox.setAttribute("id", obj.name)
-                checkBox.setAttribute("class", "ct-unsub-group-input-item");
-                var label = document.createElement("LABEL");
-                label.setAttribute("for", obj.name)
-                label.innerHTML = "Unsubscribe to " + obj.name 
-                addList.appendChild(label);
-                addList.appendChild(checkBox);
-                addList.append(document.createElement('br'));
-            }
-  }
-// This function is used to send groups updation request. User can directly call
-// `$WZRK_WR.changeSubscriptionGroups(isReencode, updatedGroups)` by passing updated groups in format specified.
-   function changeSubscriptionGroups(){
-    let unsubcribeGroups = [];
-        var elements = document.getElementsByClassName(
-            "ct-unsub-group-input-item");
-        for (var i = 0; i < elements.length; i++) {
-            var element = elements[i];
-            if(element.name) {
-                var data = {name: element.name, isUnsubscribed: element.checked}
-                unsubcribeGroups.push(data)
-            }
-        }
-        $WZRK_WR.changeSubscriptionGroups(false, unsubcribeGroups);
-     } 
-    // will be called after the subscription preferences for the user have been updated
-    function wzrk_email_subscription(status) {
-        //status 0 : unsubscribed, status 1 : subscribed
-        // todo - you can show a success message to the user from here
-        var statusLabel = 'subscribed';
-        if (status == 0) {
-            statusLabel = 'unsubscribed';
-        }
-        alert("You've been " + statusLabel);
+}
+
+function redirectToLink() {
+    window.location.href = "https://luxury.tatacliq.com/search/?searchText=armani%20exchange:relevance:category:LSH1&searchCategory=LSH1";
+}
+
+// Platform-Specific Adjustments
+if (isIOS) {
+    // iOS-specific behavior
+    video.setAttribute('playsinline', '');
+    video.setAttribute('disablePictureInPicture', '');
+
+    // Display overlay for handling clicks without triggering PiP
+    videoOverlay.style.display = 'block';
+
+    // Attempt to programmatically play the video on load
+    document.addEventListener('DOMContentLoaded', () => {
+        video.play().catch((error) => {
+            console.log('iOS Autoplay failed:', error);
+        });
+    });
+} else if (isAndroid) {
+    // Android-specific behavior (default settings, no additional changes needed)
+    videoOverlay.style.display = 'none';
+}
+
+document.addEventListener('touchstart', handleCloseEvent);
+document.addEventListener('click', handleCloseEvent);
+
+function handleCloseEvent(event) {
+    const popup = document.getElementById('video-popup');
+    const closeImage = document.getElementById('close-image');
+    if (!popup.contains(event.target) || event.target === closeImage) {
+        closePopup();
     }
- </script>
+}
+</script>
+
 </body>
 </html>
