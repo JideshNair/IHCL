@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Video Popup</title>
 <style>
-/* General CSS */
+/* General CSS for desktop */
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: transparent;
+    background-color: transparent; /* Make the body background transparent */
+}
+
+#CT_InterstitialWrapper {
+    background-color: transparent !important; /* Force background to be transparent */
 }
 
 #video-popup {
@@ -20,10 +24,10 @@ body {
     width: auto;
     height: 30%;
     aspect-ratio: 16 / 9;
-    background-color: transparent;
+    background-color: transparent; /* Make the video popup background transparent */
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: none;
+    box-shadow: none; /* Remove the shadow to ensure it's fully transparent */
     z-index: 1000;
 }
 
@@ -62,14 +66,39 @@ body {
     opacity: 0.8;
 }
 
-#video-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1002;
-    display: block;
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #video-popup {
+        bottom: 40px;
+        right: 40px; 
+        width: auto;
+        height: auto;
+        aspect-ratio: 1 / 2;
+        max-width: 40vw; /* Ensure width does not exceed 40% of viewport width */
+        max-height: 40vh; /* Ensure height does not exceed 40% of viewport height */
+        border-radius: 8px;
+    }
+
+    #video-popup video {
+        object-fit: cover; /* Maintain content without black margins */
+    }
+
+    #close-image {
+        top: 5px;
+        right: 5px;
+        height: 20px; /* Larger size for mobile */
+        width: 20px;
+    }
+
+    .mute-btn {
+        top: 5px;
+        left: 5px;
+    }
+
+    .mute-btn img {
+        height: 20px; /* Larger size for mobile */
+        width: 20px;
+    }
 }
 </style>
 </head>
@@ -80,7 +109,7 @@ body {
     <button id="mute-btn" class="mute-btn" onclick="toggleMute(event)">
         <img id="mute-icon" src="https://cdn-icons-png.flaticon.com/512/5949/5949045.png" alt="Mute">
     </button>
-    <div id="video-overlay" onclick="redirectToLink(event)"></div>
+    <div id="video-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1002; display: none;" onclick="redirectToLink(event)"></div>
     <video id="popup-video" autoplay loop muted playsinline disablePictureInPicture>
         <source src="https://videos.ctfassets.net/69qx72t49ip2/tgOKj5cHC4AH3mxloyAax/4d35baeecd59b9c79e3c5e42d3d78312/1_J-24_KCP_BZero1_Product_Animation03_1080x1920_1.mp4" type="video/mp4">
         Your browser does not support the video tag.
@@ -88,23 +117,27 @@ body {
 </div>
 
 <script>
-// Prevent Buttons from Triggering URL Redirect
-function stopPropagation(event) {
-    event.stopPropagation();
-}
+// User-Agent detection to differentiate between Android and iOS
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isAndroid = /Android/i.test(navigator.userAgent);
 
-// Close Popup
+const video = document.getElementById('popup-video');
+const muteIcon = document.getElementById('mute-icon');
+const videoOverlay = document.getElementById('video-overlay');
+
+// Common Functions
 function closePopup(event) {
-    stopPropagation(event);
-    const videoPopup = document.getElementById('video-popup');
-    videoPopup.remove();
+    event.stopPropagation(); // Prevent event bubbling
+    const overlay = window.parent.document.getElementById('intentOpacityDiv');
+    const wrapper = window.parent.document.getElementById('intentPreview');
+    setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (wrapper) wrapper.remove();
+    }, 0); 
 }
 
-// Toggle Mute
 function toggleMute(event) {
-    stopPropagation(event);
-    const video = document.getElementById('popup-video');
-    const muteIcon = document.getElementById('mute-icon');
+    event.stopPropagation(); // Prevent event bubbling
     if (video.muted) {
         video.muted = false;
         muteIcon.src = "https://cdn-icons-png.flaticon.com/512/1705/1705050.png"; // Unmute icon
@@ -114,14 +147,29 @@ function toggleMute(event) {
     }
 }
 
-// Redirect to URL
 function redirectToLink(event) {
+    event.stopPropagation(); // Prevent bubbling from overlay to buttons
     window.location.href = "https://luxury.tatacliq.com/search/?searchText=armani%20exchange:relevance:category:LSH1&searchCategory=LSH1";
 }
 
-// Add Event Listeners to Prevent Overlay Clicks
-document.getElementById('close-image').addEventListener('click', stopPropagation);
-document.getElementById('mute-btn').addEventListener('click', stopPropagation);
+// Platform-Specific Adjustments
+if (isIOS) {
+    video.setAttribute('playsinline', '');
+    video.setAttribute('disablePictureInPicture', '');
+    videoOverlay.style.display = 'block';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        video.play().catch((error) => {
+            console.log('iOS Autoplay failed:', error);
+        });
+    });
+} else if (isAndroid) {
+    videoOverlay.style.display = 'none';
+}
+
+// Add event listeners to prevent redirection when buttons are clicked
+document.getElementById('close-image').addEventListener('click', (event) => event.stopPropagation());
+document.getElementById('mute-btn').addEventListener('click', (event) => event.stopPropagation());
 </script>
 
 </body>
